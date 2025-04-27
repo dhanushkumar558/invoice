@@ -5,7 +5,7 @@ const cors = require('cors');
 const nodemailer = require('nodemailer');
 const xlsx = require('xlsx');
 const XLSX = require('xlsx');
-const PDFDocument = require('pdfkit');
+
 
 const app = express();
 const port = 5000;
@@ -57,13 +57,15 @@ app.post('/create-invoice', (req, res) => {
 });
 
 // Get all invoices
+// Get all invoices in descending order (latest first)
 app.get('/invoices', (req, res) => {
-  const query = 'SELECT * FROM invoices';
-  db.query(query, (err, results) => {
-    if (err) throw err;
-    res.json(results);
+    const query = 'SELECT * FROM invoices ORDER BY date_created DESC';
+    db.query(query, (err, results) => {
+      if (err) throw err;
+      res.json(results);
+    });
   });
-});
+  
 
 // Get a specific invoice by ID
 app.get('/invoice/:id', (req, res) => {
@@ -79,6 +81,7 @@ app.get('/invoice/:id', (req, res) => {
 app.post('/send-invoice', (req, res) => {
   const { email, invoiceId } = req.body;
 
+  // Get the invoice from the database
   const query = 'SELECT * FROM invoices WHERE id = ?';
   db.query(query, [invoiceId], (err, results) => {
     if (err) throw err;
@@ -124,46 +127,11 @@ app.get('/export-invoices', (req, res) => {
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Invoices");
 
+    // Write file to buffer and send to client
     const fileBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'buffer' });
     res.setHeader('Content-Disposition', 'attachment; filename=Invoices.xlsx');
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     res.send(fileBuffer);
-  });
-});
-
-// ✅✅✅ Export invoices to PDF
-app.get('/export-invoices-pdf', (req, res) => {
-  const query = 'SELECT * FROM invoices';
-  db.query(query, (err, results) => {
-    if (err) throw err;
-
-    const doc = new PDFDocument({ margin: 30, size: 'A4' });
-
-    res.setHeader('Content-Disposition', 'attachment; filename=Invoices.pdf');
-    res.setHeader('Content-Type', 'application/pdf');
-
-    doc.pipe(res);
-
-    doc.fontSize(20).text('Invoices List', { align: 'center' });
-    doc.moveDown();
-
-    results.forEach((invoice, idx) => {
-      doc
-        .fontSize(12)
-        .text(`Invoice Number: ${invoice.invoice_number}`)
-        .text(`Customer Name: ${invoice.customer_name}`)
-        .text(`Total Amount: ₹${invoice.total_amount}`)
-        .text(`GST: ${invoice.gst}%`)
-        .text(`Due Date: ${new Date(invoice.due_date).toLocaleDateString()}`)
-        .moveDown();
-
-      if (idx !== results.length - 1) {
-        doc.moveTo(30, doc.y).lineTo(550, doc.y).stroke();
-        doc.moveDown();
-      }
-    });
-
-    doc.end();
   });
 });
 

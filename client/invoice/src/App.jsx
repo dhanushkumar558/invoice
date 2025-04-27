@@ -18,6 +18,15 @@ function App() {
   const [selectedInvoice, setSelectedInvoice] = useState(null);
   const [exportAll, setExportAll] = useState(false);
 
+  const generateRandomInvoiceNumber = () => {
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let randomString = '';
+    for (let i = 0; i < 10; i++) {
+      randomString += characters.charAt(Math.floor(Math.random() * characters.length));
+    }
+    setInvoiceNumber(randomString);
+  };
+
   useEffect(() => {
     fetchInvoices();
   }, []);
@@ -203,37 +212,47 @@ function App() {
 
   return (
     <Container className="my-5">
-      <h1 className="text-center mb-4">Invoice Generator</h1>
+      <h1 className="text-center mb-4 text-primary">Invoice Generator</h1>
 
-      {error && <Alert variant="danger">{error}</Alert>}
-      {success && <Alert variant="success">{success}</Alert>}
+      {error && <Alert variant="danger" dismissible>{error}</Alert>}
+      {success && <Alert variant="success" dismissible>{success}</Alert>}
 
-      {/* Form Start */}
       <Form>
-        <Row className="mb-3">
+  <Row className="mb-3">
+    <Col>
+      <Form.Group controlId="customerName">
+        <Form.Label>Customer Name</Form.Label>
+        <Form.Control
+          type="text"
+          placeholder="Enter customer name"
+          value={customerName}
+          onChange={(e) => setCustomerName(e.target.value)}
+        />
+      </Form.Group>
+    </Col>
+    <Col>
+      <Form.Group controlId="invoiceNumber">
+        <Form.Label>Invoice Number</Form.Label>
+        <Row className="align-items-center">
           <Col>
-            <Form.Group controlId="customerName">
-              <Form.Label>Customer Name</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="Enter customer name"
-                value={customerName}
-                onChange={(e) => setCustomerName(e.target.value)}
-              />
-            </Form.Group>
+            <Form.Control
+              type="text"
+              placeholder="Invoice number"
+              value={invoiceNumber}
+              onChange={(e) => setInvoiceNumber(e.target.value)}
+            />
           </Col>
-          <Col>
-            <Form.Group controlId="invoiceNumber">
-              <Form.Label>Invoice Number</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="Invoice number"
-                value={invoiceNumber}
-                onChange={(e) => setInvoiceNumber(e.target.value)}
-              />
-            </Form.Group>
+          <Col xs="auto">
+            <Button variant="info" onClick={generateRandomInvoiceNumber}>Generate</Button>
           </Col>
         </Row>
+      </Form.Group>
+    </Col>
+    <Col xs={3}>
+      {/* This is removed, since the button is now inside the form group row */}
+    </Col>
+  </Row>
+
 
         <Row className="mb-3">
           <Col>
@@ -250,36 +269,38 @@ function App() {
 
         <h4 className="mt-4">Items</h4>
         {items.map((item, index) => (
-          <Row key={index} className="mb-3">
-            <Col>
-              <Form.Control
-                type="text"
-                placeholder="Item Name"
-                value={item.name}
-                onChange={(e) => handleItemChange(index, 'name', e.target.value)}
-              />
-            </Col>
-            <Col>
-              <Form.Control
-                type="number"
-                placeholder="Unit Price"
-                value={item.price}
-                onChange={(e) => handleItemChange(index, 'price', Number(e.target.value))}
-              />
-            </Col>
-            <Col>
-              <Form.Control
-                type="number"
-                placeholder="Quantity"
-                value={item.quantity}
-                onChange={(e) => handleItemChange(index, 'quantity', Number(e.target.value))}
-              />
-            </Col>
-            <Col xs="auto">
-              <Button variant="danger" onClick={() => handleRemoveItem(index)}>Remove</Button>
-            </Col>
-          </Row>
-        ))}
+  <Row key={index} className="mb-3">
+    <Col>
+      <Form.Control
+        type="text"
+        placeholder="Item Name"
+        value={item.name}
+        onChange={(e) => handleItemChange(index, 'name', e.target.value)}
+      />
+    </Col>
+    <Col>
+      <Form.Control
+        type="text"
+        placeholder="Unit Price"
+        value={item.price || ''}
+        onChange={(e) => handleItemChange(index, 'price', Number(e.target.value))}
+      />
+    </Col>
+    <Col>
+      <Form.Control
+        type="text"
+        placeholder="Quantity"
+        value={item.quantity || ''}
+        onChange={(e) => handleItemChange(index, 'quantity', Number(e.target.value))}
+      />
+    </Col>
+    <Col xs="auto">
+      <Button variant="danger" onClick={() => handleRemoveItem(index)}>Remove</Button>
+    </Col>
+  </Row>
+))}
+
+
         <Button variant="primary" onClick={handleAddItem}>Add Item</Button>
 
         <Row className="mt-4">
@@ -306,10 +327,9 @@ function App() {
           </Col>
         </Row>
 
-        <Button variant="success" onClick={handleCreateInvoice} className="mt-3">Create Invoice</Button>
+        <Button variant="success" onClick={handleCreateInvoice} className="mt-3 w-100">Create Invoice</Button>
       </Form>
 
-      {/* Invoice List */}
       <h3 className="mt-5">Invoices List</h3>
       <Button variant="info" className="mb-3" onClick={handleExportAll}>Export All Invoices</Button>
 
