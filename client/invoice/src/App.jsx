@@ -319,7 +319,7 @@ function App() {
             <Form.Group controlId="gst">
               <Form.Label>GST (%)</Form.Label>
               <Form.Control
-                type="number"
+                type="text"
                 value={gst}
                 onChange={(e) => setGst(Number(e.target.value))}
               />
