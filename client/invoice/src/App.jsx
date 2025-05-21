@@ -56,7 +56,7 @@ function App() {
       due_date: dueDate,
     };
 
-    axios.post('http://localhost:5000/create-invoice', invoiceData)
+    axios.post('https://boltxgaming.com/invoice/create-invoice', invoiceData)
       .then(() => {
         setSuccess('Invoice created successfully!');
         setError('');
@@ -107,7 +107,7 @@ function App() {
 
   const exportAllInvoicesToExcel = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/export-invoices', {
+      const response = await axios.get('https://boltxgaming.com/invoice/export-invoices', {
         responseType: 'blob',
       });
       const url = window.URL.createObjectURL(new Blob([response.data]));
@@ -152,7 +152,7 @@ function App() {
 
   const exportAllInvoicesToTxt = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/invoices');
+      const response = await axios.get('https://boltxgaming.com/invoice/invoices');
       const allInvoices = response.data;
       let content = '';
 
