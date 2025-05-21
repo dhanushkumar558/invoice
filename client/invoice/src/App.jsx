@@ -32,7 +32,7 @@ function App() {
   }, []);
 
   const fetchInvoices = () => {
-    axios.get('http://localhost:5000/invoices')
+    axios.get('https://boltxgaming.com/invoice/invoices')
       .then(response => setInvoices(response.data))
       .catch(err => console.error('Error fetching invoices:', err));
   };
